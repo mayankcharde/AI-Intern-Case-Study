@@ -1,0 +1,18 @@
+FREIGHTTIGER REPRODUCIBILITY REPORT
+============================================================
+Number of runs: 3
+
+Run 1: D:\AI Intern Case Study\AI Intern Case Study\outputs\run_1.csv
+  SHA-256: 50c4cb536842fee59857a842b5b31645f6c74a2030f37e7d46badc4e19e13f35
+  rows: 728, flagged: 27, justified: 5, unexplained: 22
+Run 2: D:\AI Intern Case Study\AI Intern Case Study\outputs\run_2.csv
+  SHA-256: 50c4cb536842fee59857a842b5b31645f6c74a2030f37e7d46badc4e19e13f35
+  rows: 728, flagged: 27, justified: 5, unexplained: 22
+Run 3: D:\AI Intern Case Study\AI Intern Case Study\outputs\run_3.csv
+  SHA-256: 50c4cb536842fee59857a842b5b31645f6c74a2030f37e7d46badc4e19e13f35
+  rows: 728, flagged: 27, justified: 5, unexplained: 22
+
+Byte-identical outputs: True
+  All deterministic fields match (files are byte-identical).
+
+Overall deterministic match: True

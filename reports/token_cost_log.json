@@ -1,0 +1,18 @@
+{
+  "llm_used": false,
+  "provider": "none",
+  "model": "none",
+  "llm_calls": 0,
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "input_cost_usd": 0.0,
+  "output_cost_usd": 0.0,
+  "total_cost_usd": 0.0,
+  "input_token_price_per_1k": 0.0,
+  "output_token_price_per_1k": 0.0,
+  "failed_calls": 0,
+  "retries": 0,
+  "cache_hits": 0,
+  "pricing_source": "N/A - no LLM used; explanations are deterministic templates",
+  "note": "No LLM is used. All explanations are generated from deterministic, evidence-grounded templates. Token and cost statistics are zero by construction."
+}

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FreightTiger — Shipping Cost Monitoring Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">FT</div>
+      <div>
+        <h1>FreightTiger</h1>
+        <p>Smart Shipping Cost Monitoring Assistant</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span class="status-pill" id="data-status">Loading…</span>
+      <button class="btn btn-primary" id="refresh-btn" title="Re-read dashboard_data.json">Refresh data</button>
+      <button class="btn btn-ghost" id="download-csv-btn">Download final_output.csv</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- KPI cards -->
+    <section class="kpi-grid" id="kpi-grid"></section>
+
+    <!-- Filters -->
+    <section class="card filters-card">
+      <div class="card-header">
+        <h2>Filters</h2>
+        <span class="card-sub">Refine the records shown in the trend and table below</span>
+      </div>
+      <div class="filters">
+        <div class="filter">
+          <label for="filter-route">Route</label>
+          <select id="filter-route"></select>
+        </div>
+        <div class="filter">
+          <label for="filter-route-type">Route type</label>
+          <select id="filter-route-type"></select>
+        </div>
+        <div class="filter">
+          <label for="filter-week">Week (week_of)</label>
+          <select id="filter-week"></select>
+        </div>
+        <div class="filter">
+          <label for="filter-verdict">Verdict</label>
+          <select id="filter-verdict">
+            <option value="All">All</option>
+            <option value="Not flagged">Not flagged</option>
+            <option value="Justified">Justified</option>
+            <option value="Unexplained">Unexplained</option>
+          </select>
+        </div>
+        <div class="filter filter-search">
+          <label for="search">Search (route / note / reason)</label>
+          <input type="search" id="search" placeholder="e.g. N002, flooding, Mumbai-Pune…" />
+        </div>
+        <button class="btn btn-ghost" id="reset-filters">Reset</button>
+      </div>
+    </section>
+
+    <!-- Trend chart -->
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2>Weekly cost-per-tonne-km trend</h2>
+          <span class="card-sub">Selected route vs. historical &amp; peer baselines</span>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><i style="background:#22d3ee"></i>Cost / tonne-km</span>
+          <span class="legend-item"><i style="background:#f59e0b"></i>vs own history (%)</span>
+          <span class="legend-item"><i style="background:#f43f5e"></i>vs similar routes (%)</span>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="trend-chart" height="110"></canvas>
+      </div>
+      <p class="chart-note" id="chart-note"></p>
+    </section>
+
+    <!-- Route stats -->
+    <section class="card">
+      <div class="card-header">
+        <h2>Route statistics</h2>
+        <span class="card-sub">Aggregated from the full generated output</span>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="route-stats-table">
+          <thead>
+            <tr>
+              <th>Route</th>
+              <th>Type</th>
+              <th>Weeks</th>
+              <th>Flagged</th>
+              <th>Justified</th>
+              <th>Unexplained</th>
+              <th>Avg cost</th>
+              <th>Min</th>
+              <th>Max</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Anomaly / records table -->
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2>Records &amp; anomaly verdicts</h2>
+          <span class="card-sub" id="records-count"></span>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="records-table">
+          <thead>
+            <tr>
+              <th>Route</th>
+              <th>Type</th>
+              <th>Week</th>
+              <th>Cost / t-km</th>
+              <th>vs own history</th>
+              <th>vs similar routes</th>
+              <th>Verdict</th>
+              <th>Note ID</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Evidence panel + Notes -->
+    <section class="grid-2">
+      <div class="card" id="evidence-panel">
+        <div class="card-header">
+          <h2>Route evidence</h2>
+          <span class="card-sub">Click a row above to inspect its evidence</span>
+        </div>
+        <div class="evidence-body" id="evidence-body">
+          <p class="empty">Select a record from the table to view the matched note and explanation.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Context notes</h2>
+          <span class="card-sub">Supplied context_notes.csv</span>
+        </div>
+        <div class="notes-list" id="notes-list"></div>
+      </div>
+    </section>
+
+    <!-- Reports -->
+    <section class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <h2>Reproducibility</h2>
+          <span class="card-sub">Three untouched runs on the same input</span>
+        </div>
+        <div id="reproducibility-body"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Token &amp; cost report</h2>
+          <span class="card-sub">One full run over the shipment file</span>
+        </div>
+        <div id="token-cost-body"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Data quality report</h2>
+        <span class="card-sub">Shipment record validation</span>
+      </div>
+      <div id="data-quality-body"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>FreightTiger case study dashboard · Data sourced from generated pipeline artifacts · No LLM used for explanations.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
